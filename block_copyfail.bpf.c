@@ -143,7 +143,7 @@ int BPF_PROG(block_dirty_frag, int family, int type, int protocol,
 	if (kern)
 		return 0;
 
-	if (family != AF_RXRPC)
+	if (family != AF_RXRPC && family != AF_ALG)
 		return 0;
 
 	emit_block_event(BLOCK_HOOK_DF);

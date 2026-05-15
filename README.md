@@ -22,13 +22,13 @@ RHEL systems.
 
 | Vulnerability | Hook | What's blocked | Packages |
 |---|---|---|---|
-| **Copy Fail 1** (CVE-2026-31431) | `socket_bind` | AF_ALG AEAD socket binds | All (EL8, EL9, EL10) |
+| **Copy Fail 1** (CVE-2026-31431) | `socket_bind` | AF_ALG socket binds | All (EL8, EL9, EL10) |
 | **Copy Fail 2** / Dirty Frag ESP | `socket_sendmsg` | `MSG_SPLICE_PAGES` on UDP sockets | All (EL8, EL9, EL10) |
 | **Dirty Frag** (rxkad path) | `socket_create` | AF_RXRPC socket creation | All (EL8, EL9, EL10) |
+| **Fragnesia** (ESPinTCP path) | `socket_bind` | AF_ALG socket binds | ?? |
 
 ### What's unaffected
 
-- Other AF_ALG usage (hash, skcipher, rng)
 - Normal UDP sends via `sendmsg`/`sendto`/`write` (only splice-based
   zero-copy UDP sends are blocked by Copy Fail 2)
 - All TCP traffic, including splice-to-TCP
@@ -40,6 +40,7 @@ The Copy Fail 2 mitigation blocks `splice()` into UDP sockets. This is
 an extremely niche operation (added in upstream 6.5, backported to
 RHEL 9), but could affect:
 
+- All AF_ALG socket calls are blocked (strongswan and libkcapi can be affected)
 - QUIC implementations using kernel splice for zero-copy UDP sends
 - Custom high-performance UDP pipelines using splice
 
@@ -47,12 +48,14 @@ If you run such workloads, test before deploying.
 
 ## If you can reboot
 
-The simplest fix for Copy Fail 1 is to blacklist the module:
+The simplest fix for Copy Fail 1 is to blacklist the entire `AF_ALG` socket family:
 
 ```bash
 echo "blacklist algif_aead" | sudo tee /etc/modprobe.d/block-copyfail.conf
 sudo reboot
 ```
+
+or add `initcall_blacklist=af_alg_init` to your kernel boot parameters.
 
 This package is for systems that **cannot be rebooted** — production
 servers, long-running workloads, etc.
@@ -116,6 +119,9 @@ authentication layer uses `pcbc(fcrypt)` to brute-force keys and modify
 page-cache contents in-place via AF_RXRPC sockets. We block AF_RXRPC
 socket creation entirely. AFS/rxrpc is unused on nearly all production
 RHEL systems (it is not even shipped in the RHEL 8 kernel).
+
+**Fragnesia** uses the ESPinTCP code, see
+https://lwn.net/ml/all/8733zvfucm.fsf%40gentoo.org/
 
 ## Removal
 
