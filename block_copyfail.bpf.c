@@ -60,10 +60,8 @@ struct sockaddr;
 
 #define AF_INET   2
 #define AF_INET6 10
-#define SOCK_STREAM 1
 #define SOCK_DGRAM 2
 #define IPPROTO_UDP 17
-#define IPPROTO_TCP 6
 #define SOL_UDP     17
 #define UDP_ENCAP  100
 #define MSG_SPLICE_PAGES 0x08000000
@@ -179,8 +177,7 @@ int BPF_PROG(block_copyfail2, struct socket *sock,
 	if (!(BPF_CORE_READ(msg, msg_flags) & MSG_SPLICE_PAGES))
 		return 0;
 
-	if (BPF_CORE_READ(sock, type) != SOCK_DGRAM &&
-		BPF_CORE_READ(sock, type) != SOCK_STREAM)
+	if (BPF_CORE_READ(sock, type) != SOCK_DGRAM)
 		return 0;
 
 	sk = BPF_CORE_READ(sock, sk);
@@ -191,8 +188,7 @@ int BPF_PROG(block_copyfail2, struct socket *sock,
 	    BPF_CORE_READ(sk, __sk_common.skc_family) != AF_INET6)
 		return 0;
 
-	if (BPF_CORE_READ(sk, sk_protocol) != IPPROTO_UDP &&
-			BPF_CORE_READ(sk, sk_protocol) != IPPROTO_TCP)
+	if (BPF_CORE_READ(sk, sk_protocol) != IPPROTO_UDP)
 		return 0;
 
 	emit_block_event(BLOCK_HOOK_CF2);

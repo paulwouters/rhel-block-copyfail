@@ -25,7 +25,6 @@ RHEL systems.
 | **Copy Fail 1** (CVE-2026-31431) | `socket_bind` | AF_ALG AEAD socket binds | All (EL8, EL9, EL10) |
 | **Copy Fail 2** / Dirty Frag ESP | `socket_sendmsg` | `MSG_SPLICE_PAGES` on UDP sockets | All (EL8, EL9, EL10) |
 | **Dirty Frag** (rxkad path) | `socket_create` | AF_RXRPC socket creation | All (EL8, EL9, EL10) |
-| **Fragnesia** (ESPinTCP path) | `socket_bind` | AF_ALG AEAD socket binds | ?? |
 
 ### What's unaffected
 
@@ -117,9 +116,6 @@ authentication layer uses `pcbc(fcrypt)` to brute-force keys and modify
 page-cache contents in-place via AF_RXRPC sockets. We block AF_RXRPC
 socket creation entirely. AFS/rxrpc is unused on nearly all production
 RHEL systems (it is not even shipped in the RHEL 8 kernel).
-
-**Fragnesia** uses the ESPinTCP code, see
-https://lwn.net/ml/all/8733zvfucm.fsf%40gentoo.org/
 
 ## Removal
 

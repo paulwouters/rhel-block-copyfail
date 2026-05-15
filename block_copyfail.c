@@ -36,7 +36,7 @@ static const char *hook_name(__u32 hook)
 {
 	switch (hook) {
 	case BLOCK_HOOK_CF1:   return "AF_ALG-AEAD";
-	case BLOCK_HOOK_CF2:   return "ESP-encap-splice";
+	case BLOCK_HOOK_CF2:   return "ESP-UDP-splice";
 	case BLOCK_HOOK_DF:    return "AF_RXRPC";
 	case BLOCK_HOOK_ENCAP: return "UDP_ENCAP";
 	default:               return "unknown";
